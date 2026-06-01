@@ -54,7 +54,7 @@ A production-grade document Q&A chatbot powered by **LangChain**, **OpenAI/Anthr
 ### 1. Clone & configure
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/documind.git
+git clone https://github.com/ubp-as/documind.git
 cd documind
 cp .env.example .env
 # Edit .env with your API keys
