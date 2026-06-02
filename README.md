@@ -1,17 +1,17 @@
-# 📚 DocuMind — Document Q&A Chatbot
+# 🔍 DocLens — Document Q&A Chatbot
 
-A production-grade document Q&A chatbot powered by **LangChain**, **OpenAI/Anthropic**, **ChromaDB**, and **FastAPI**. Upload PDFs or text files and ask questions in plain English — the system retrieves the most relevant passages and synthesizes accurate, cited answers.
+A production-grade RAG (Retrieval-Augmented Generation) chatbot powered by **LangChain**, **OpenAI / Anthropic**, **ChromaDB**, and **FastAPI**. Upload PDFs or text files and ask questions in plain English — DocLens retrieves the most relevant passages and synthesizes accurate, cited answers.
 
 ## ✨ Features
 
-- **Retrieval-Augmented Generation (RAG)** — Answers grounded in your documents, not hallucinations
+- **RAG pipeline** — Answers grounded in your documents, not hallucinations
 - **Multi-document support** — Upload and query across multiple PDFs or text files
 - **Citation tracking** — Every answer links back to its source passage(s)
-- **LLM-agnostic** — Swap between OpenAI GPT-4o and Anthropic Claude with a single env flag
+- **LLM-agnostic** — Swap between OpenAI GPT-4o and Anthropic Claude via a single env flag
 - **RESTful API** — FastAPI backend with full OpenAPI docs at `/docs`
 - **Query logging** — All queries + responses stored in PostgreSQL for analytics
 - **Vector search** — ChromaDB with persistent storage and cosine similarity
-- **Streaming responses** — Server-sent events for real-time token streaming
+- **Streaming responses** — Server-Sent Events for real-time token streaming
 - **Docker Compose** — One command to run everything
 
 ## 🏗️ Architecture
@@ -54,8 +54,8 @@ A production-grade document Q&A chatbot powered by **LangChain**, **OpenAI/Anthr
 ### 1. Clone & configure
 
 ```bash
-git clone https://github.com/ubp-as/documind.git
-cd documind
+git clone https://github.com/YOUR_USERNAME/doclens.git
+cd doclens
 cp .env.example .env
 # Edit .env with your API keys
 ```
@@ -66,16 +66,16 @@ cp .env.example .env
 docker compose up --build
 ```
 
-API will be live at `http://localhost:8000` — interactive docs at `http://localhost:8000/docs`
+API live at `http://localhost:8000` — interactive docs at `http://localhost:8000/docs`
 
-### 3. Or run locally (dev mode)
+### 3. Run locally (dev mode)
 
 ```bash
 cd backend
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 
-# Start PostgreSQL separately (or use Docker just for DB):
+# Start PostgreSQL via Docker only
 docker compose up postgres -d
 
 # Run migrations
@@ -143,31 +143,44 @@ pytest tests/ -v --cov=app
 | `LLM_PROVIDER` | `openai` | `openai` or `anthropic` |
 | `OPENAI_API_KEY` | — | OpenAI API key |
 | `ANTHROPIC_API_KEY` | — | Anthropic API key |
-| `LLM_MODEL` | `gpt-4o` | Model name |
+| `LLM_MODEL` | `gpt-4o` | OpenAI model name |
+| `ANTHROPIC_MODEL` | `claude-3-5-sonnet-20241022` | Anthropic model name |
 | `EMBEDDING_MODEL` | `text-embedding-3-small` | Embedding model |
 | `CHUNK_SIZE` | `800` | Token chunk size for splitting |
 | `CHUNK_OVERLAP` | `150` | Overlap between chunks |
 | `CHROMA_PERSIST_DIR` | `./chroma_db` | Vector store path |
 | `DATABASE_URL` | `postgresql://...` | PostgreSQL connection string |
+| `CORS_ORIGINS` | `http://localhost:3000` | Allowed CORS origins (comma-separated) |
+| `MAX_UPLOAD_SIZE_MB` | `50` | Max file upload size |
 
 ## 🗂️ Project Structure
 
 ```
-doc-qa-chatbot/
+doclens/
 ├── backend/
 │   ├── app/
-│   │   ├── api/          # FastAPI route handlers
-│   │   ├── core/         # Config, RAG engine, embeddings
-│   │   ├── db/           # SQLAlchemy models + migrations
-│   │   ├── services/     # Ingestion, query logging, streaming
-│   │   └── main.py       # App entrypoint
-│   ├── tests/            # Pytest test suite
+│   │   ├── api/              # FastAPI route handlers
+│   │   │   ├── chat.py       # Chat query & streaming endpoints
+│   │   │   └── documents.py  # Document upload/list/delete endpoints
+│   │   ├── core/             # Config, RAG engine, vector store
+│   │   │   ├── config.py
+│   │   │   ├── rag_engine.py
+│   │   │   └── vector_store.py
+│   │   ├── db/               # SQLAlchemy models & session
+│   │   │   └── models.py
+│   │   ├── services/         # Business logic
+│   │   │   ├── ingestion.py
+│   │   │   └── query_logger.py
+│   │   └── main.py           # App entrypoint & lifespan
+│   ├── tests/
+│   │   └── test_api.py
 │   ├── requirements.txt
 │   └── Dockerfile
 ├── scripts/
-│   └── ingest_sample.py  # Bulk ingest helper script
+│   └── bulk_ingest.py        # CLI tool to bulk-upload a directory
 ├── docker-compose.yml
 ├── .env.example
+├── .gitignore
 └── README.md
 ```
 
